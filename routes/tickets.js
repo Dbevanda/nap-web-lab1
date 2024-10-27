@@ -29,14 +29,24 @@ router.post("/generate-ticket", checkJwt, async (req, res) => {
 
     const ticketId = uuidv4();
     const ticketUrl = `${process.env.BASE_URL}/ticket/${ticketId}`;
-    const qrCode = await QRCode.toDataURL(ticketUrl);
+
+    // Generate the QR code as a PNG buffer
+    const qrCodeBuffer = await QRCode.toBuffer(ticketUrl);
 
     await pool.query(
       "INSERT INTO tickets (id, vatin, first_name, last_name, created_at) VALUES ($1, $2, $3, $4, NOW())",
       [ticketId, vatin, firstName, lastName]
     );
 
-    res.json({ ticketId, qrCode });
+    // Set response headers to return an image
+    res.setHeader("Content-Type", "image/png");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="ticket-${ticketId}.png"`
+    );
+
+    // Send the QR code image as a PNG buffer
+    res.send(qrCodeBuffer);
   } catch (error) {
     res.status(500).send("Server error");
   }
