@@ -34,7 +34,7 @@ router.post("/generate-ticket", checkJwt, async (req, res) => {
     const qrCodeBuffer = await QRCode.toBuffer(ticketUrl);
 
     await pool.query(
-      "INSERT INTO tickets (id, vatin, first_name, last_name, created_at) VALUES ($1, $2, $3, $4, NOW())",
+      "INSERT INTO tickets (id, vatin, first_name, last_name, created_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Zagreb')",
       [ticketId, vatin, firstName, lastName]
     );
 
